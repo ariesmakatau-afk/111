@@ -21,7 +21,6 @@ import TeamGrid from "@/components/people/TeamGrid";
 import CustomerWall from "@/components/people/CustomerWall";
 import Reviews from "@/components/sections/Reviews";
 import TodayAtYiannis from "@/components/sections/TodayAtYiannis";
-import Visit from "@/components/sections/Visit";
 import Faq from "@/components/sections/Faq";
 import FinalCta from "@/components/sections/FinalCta";
 import ShopPulse from "@/components/widgets/ShopPulse";
@@ -373,11 +372,11 @@ export default async function HomePage() {
             <div className="relative" data-reveal="scale">
               <div className="relative aspect-[4/3] overflow-hidden rounded-[30px] shadow-[0_0_0_1px_rgba(255,255,255,.12),0_40px_80px_-30px_rgba(255,90,20,.45)]">
                 <Image
-                  src="/images/platter-topdown.jpg"
-                  alt="A plate of charcoal meat with salad, chips, pita and garlic sauce on the table"
+                  src="/images/fire-plate.jpg"
+                  alt="A plate of charcoal meat and salad in front of the spits turning over open flame"
                   fill
                   sizes="(min-width: 1024px) 560px, 92vw"
-                  className="object-cover object-[70%_50%]"
+                  className="object-cover object-[50%_60%]"
                 />
                 <div className="firelight" />
                 <div className="absolute inset-0 bg-gradient-to-t from-char-900/60 to-transparent" />
@@ -596,7 +595,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Visit compact />
       <Faq maxItems={4} moreHref="/visit" />
       <FinalCta />
     </>

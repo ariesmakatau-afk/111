@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: site.name,
     locale: "en_AU",
-    images: [{ url: "/images/og.jpg", width: 1200, height: 630, alt: "Yianni's Hellenic Yiros shopfront, Hindley Street" }],
+    images: [{ url: "/images/og.jpg", width: 1200, height: 630, alt: "Charcoal yiros meat in front of the spits at Yianni's, Hindley Street" }],
   },
   twitter: { card: "summary_large_image" },
 };

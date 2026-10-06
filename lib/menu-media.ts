@@ -4,7 +4,7 @@ export const productPhotos: Record<string, { src: string; alt: string }> = {
   yiros: { src: "/images/yiros-wrap-2.jpg", alt: "A charcoal yiros wrapped in paper, chips behind it" },
   "ab-pack": { src: "/images/ab-pack-box.jpg", alt: "An AB Pack: charcoal meat over chips with sauces" },
   "meat-pack": { src: "/images/meat-pack.jpg", alt: "A Meat Pack: charcoal meat with garlic sauce" },
-  "yiros-pack": { src: "/images/meat-pack.jpg", alt: "A Yiros Pack: charcoal meat and salad with garlic sauce" },
+  "yiros-pack": { src: "/images/yiros-pack.jpg", alt: "A Yiros Pack: charcoal meat and salad with garlic sauce" },
   platter: { src: "/images/platter-blue.jpg", alt: "A platter of charcoal meat, salad and pita" },
   chips: { src: "/images/chips-tray.jpg", alt: "A tray of hot chips" },
   "greek-coffee": { src: "/images/greek-coffee.jpg", alt: "A Greek coffee in a meander cup" },

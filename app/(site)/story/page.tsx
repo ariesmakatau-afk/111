@@ -74,11 +74,11 @@ export default function StoryPage() {
             <div className="arch-frame mx-auto max-w-[460px]">
               <div className="arch aspect-[4/3]">
                 <Image
-                  src="/images/storefront.jpg"
-                  alt="Yianni's Hellenic Yiros shopfront on Hindley Street — blue and white, Spartan helmets, EST-2002"
+                  src="/images/storefront-crowd.jpg"
+                  alt="The Yianni's Hellenic Yiros shopfront on Hindley Street, with the lunch crowd under the umbrellas"
                   fill
                   sizes="(min-width: 1024px) 440px, 90vw"
-                  className="arch__img !scale-100 object-[50%_40%]"
+                  className="arch__img !scale-100 object-[40%_50%]"
                 />
               </div>
             </div>

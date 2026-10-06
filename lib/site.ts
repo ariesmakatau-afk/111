@@ -55,20 +55,17 @@ export const award = {
 };
 
 /**
- * The landing-page background. Drop the looping spit video into
- * /public/video/spits.mp4 (ideally a spits.webm alongside) and it takes
- * over the hero once it can play smoothly — until the file exists, the
- * poster shows and nothing looks broken.
- * Best results: 1920×1080, 8–15 seconds, seamless loop, no audio, under 8MB.
+ * The landing-page background: the spits turning over the coals. Phones get a
+ * tall clip, larger screens a wide one (see public/video/README.md). Each
+ * poster is its clip's first frame, so the handoff to video is invisible.
+ * Set a src to null to fall back to the still poster.
  */
-export const heroVideo: { src: string | null; webm: string | null; poster: string; posterMobile: string } = {
-  // No video file has been uploaded yet; pointing at a missing file cost every
-  // visitor a failed download. Set to "/video/spits.mp4" once it's in place.
-  src: null,
-  webm: null, // e.g. "/video/spits.webm"
-  poster: "/images/lamb-plate.jpg",
-  // Phones get a portrait photo: a wide one cropped to a tall screen shows only a sliver.
-  posterMobile: "/images/meat-pack.jpg",
+export const heroVideo: { src: string | null; srcMobile: string | null; poster: string; posterMobile: string } = {
+  src: "/video/hero-wide.mp4",
+  srcMobile: "/video/hero-tall.mp4",
+  poster: "/images/hero-wide.jpg",
+  // Phones get a portrait frame: a wide one cropped to a tall screen shows only a sliver.
+  posterMobile: "/images/hero-tall.jpg",
 };
 
 /** Client-confirmed: only the lamb is claimed as halal; show it as a compact sticker. */

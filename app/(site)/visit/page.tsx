@@ -55,7 +55,7 @@ export default function VisitPage() {
         }
         lede={`${fullAddress}. Blue and white out front, Spartan helmets on the sign, charcoal smoke on the footpath. You can't miss it.`}
         image={
-          <Image src="/images/storefront.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[50%_65%]" />
+          <Image src="/images/storefront-crowd.jpg" alt="" fill priority sizes="100vw" className="object-cover object-[40%_45%]" />
         }
       />
 

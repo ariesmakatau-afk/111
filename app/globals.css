@@ -886,17 +886,6 @@
   animation: rise 1.1s var(--ease) both;
   animation-delay: var(--d, 0ms);
 }
-.hero-drift {
-  animation: drift 26s ease-in-out infinite alternate;
-  will-change: transform;
-}
-/* Phones keep the poster still — a slow zoom isn't worth the battery. */
-@media (max-width: 639px) {
-  .hero-drift {
-    animation: none;
-    will-change: auto;
-  }
-}
 .scroll-cue {
   animation: cue 2.2s ease-in-out infinite;
 }
@@ -908,14 +897,6 @@
 /* --------------------------------------------------------------------------
    Keyframes
    -------------------------------------------------------------------------- */
-@keyframes drift {
-  0% {
-    transform: scale(1.08) translate3d(0, 0, 0);
-  }
-  100% {
-    transform: scale(1.18) translate3d(-2.5%, -1.5%, 0);
-  }
-}
 @keyframes cue {
   0%,
   100% {

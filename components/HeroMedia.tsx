@@ -5,20 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import { heroVideo } from "@/lib/site";
 
 /**
- * The landing-page background: the looping spit video when one is set in
- * lib/site.ts, otherwise the poster photo drifting slowly. Reduced-motion
- * visitors get the still frame. The video only takes over once it can play
- * smoothly — then it eases in over ~1.5s from a slightly closer scale, so
- * the handoff reads as the photo coming alive, not a cut to a video.
- *
- * The poster is one <picture>: phones download only the portrait photo,
- * larger screens only the wide one (two separate priority images made every
- * phone fetch both).
+ * The landing-page background: the spits turning over the coals. The poster
+ * is one <picture> (phones download only the tall frame, larger screens only
+ * the wide one). Once the page is up, the matching clip is chosen for the
+ * screen and eases in over the poster — which is its own first frame, so the
+ * handoff reads as the photo coming alive. Reduced-motion and data-saver
+ * visitors keep the still.
  */
 export default function HeroMedia() {
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const hasVideo = Boolean(heroVideo.src || heroVideo.webm);
 
   const common = { alt: "", fill: true, priority: true, sizes: "100vw" } as const;
   const {
@@ -29,10 +25,11 @@ export default function HeroMedia() {
   useEffect(() => {
     const v = video.current;
     if (!v) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      v.pause();
-      return;
-    }
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || saveData) return;
+    const src = window.matchMedia("(min-width: 640px)").matches ? heroVideo.src : heroVideo.srcMobile;
+    if (!src) return;
+    v.src = src;
     v.play().catch(() => {});
     // Pause when scrolled away — no point decoding frames nobody sees.
     const io = new IntersectionObserver(([e]) => (e.isIntersecting ? v.play().catch(() => {}) : v.pause()));
@@ -47,27 +44,20 @@ export default function HeroMedia() {
         <img
           {...posterProps}
           alt=""
-          className={`object-cover object-[50%_60%] transition-opacity duration-[1800ms] ease-out sm:object-[65%_50%] ${
-            hasVideo ? "" : "hero-drift"
-          } ${playing ? "opacity-0" : "opacity-100"}`}
+          className={`object-cover object-[50%_60%] transition-opacity duration-[1800ms] ease-out sm:object-center ${
+            playing ? "opacity-0" : "opacity-100"
+          }`}
         />
       </picture>
-      {hasVideo && (
-        <video
-          ref={video}
-          className={`hero-video absolute inset-0 h-full w-full object-cover ${playing ? "is-playing" : ""}`}
-          muted
-          loop
-          playsInline
-          autoPlay
-          preload="auto"
-          poster={heroVideo.poster}
-          onPlaying={() => setPlaying(true)}
-        >
-          {heroVideo.webm && <source src={heroVideo.webm} type="video/webm" />}
-          {heroVideo.src && <source src={heroVideo.src} type="video/mp4" />}
-        </video>
-      )}
+      <video
+        ref={video}
+        className={`hero-video absolute inset-0 h-full w-full object-cover object-[50%_60%] sm:object-center ${playing ? "is-playing" : ""}`}
+        muted
+        loop
+        playsInline
+        preload="none"
+        onPlaying={() => setPlaying(true)}
+      />
     </div>
   );
 }
