@@ -228,7 +228,7 @@ export default function YirosBuilder() {
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center rounded-full border border-line bg-white shadow-sm">
+            <span className="inline-flex items-center rounded-full border border-line bg-white shadow-sm">
               <button type="button" aria-label="One fewer" className="p-2.5 text-blue hover:text-ember" onClick={() => setQty((q) => Math.max(1, q - 1))}>
                 <IconMinus className="h-4 w-4" />
               </button>

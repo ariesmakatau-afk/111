@@ -32,6 +32,7 @@ export const metadata: Metadata = {
   title: "Menu & online order",
   description:
     "Order charcoal yiros, AB Packs, Meat Packs, chips and drinks online for pickup from Yianni's, 270 Hindley Street, Adelaide. Full menu and prices.",
+  alternates: { canonical: "/menu" },
 };
 
 // The "online orders paused" switch in /admin shows up within 15 seconds.
@@ -147,7 +148,7 @@ export default async function MenuPage() {
             </span>
           </>
         }
-        lede="Tap Add, pick your meat and sauces, and send it through. It'll be ready at your pickup time. Pay at the counter."
+        lede="Tap Add, pick your meat and sauces, choose a pickup time. It'll be hot when you walk in. Pay at the counter."
       >
         <div className="fade-up mt-6 flex flex-wrap items-center gap-3" style={{ "--d": "380ms" } as React.CSSProperties}>
           <OpenStatus />
@@ -210,7 +211,7 @@ export default async function MenuPage() {
                   <li
                     key={s}
                     className={`rounded-full px-3.5 py-1.5 text-sm font-bold ${
-                      s === "Garlic" ? "text-[#1d0700] shadow-[0_6px_16px_-6px_rgba(255,90,20,.8)]" : "bg-mist text-blue-deep"
+                      s === "Garlic" ? "text-[#1d0700] shadow-[0_6px_16px_-6px_rgba(7,24,58,.45)]" : "bg-mist text-blue-deep"
                     }`}
                     style={s === "Garlic" ? { background: "var(--fire-btn)" } : undefined}
                   >

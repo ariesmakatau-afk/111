@@ -84,7 +84,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Ask before big changes to wording or design. Push website changes to `main` once they're tested.
 
 ## Repos (GitHub: ariesmakatau-afk)
-- **template-update**: the live website. Work here and push to `main`. It deploys on Vercel (template-update-one.vercel.app).
+- **111**: copy of template-update for refining the site. **Make all changes here** and push to `main`.
+- **template-update**: the live website (template-update-one.vercel.app). **Read-only — never change it.**
 - **Template**: the older original. Reference only, don't push.
 - **karpathy**: my coding rules ("superpowers"). **Read and follow it. Never change it.**
 
@@ -144,3 +145,6 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Copy rewrite with humour
 - This CLAUDE.md (rules + superpowers + memory) added
 - Photos show straight after upload, Parea teaser on home, Deal banner + /menu deal
+- 111 refinement pass (Oct 2026): orange button shadows → navy; builder − 1 + stepper fixed; "The usuals" swipe on phones; iPhone safe-area for order bar/sheets; hero downloads one photo per device; missing hero video no longer requested; canonical URLs, robots rules, site address from Vercel; smaller favicon; light wording tidy-ups
+- Hero video: none uploaded yet. To add one, put it in `public/video/spits.mp4` and set `heroVideo.src` in `lib/site.ts`.
+- Once the shop's own domain is live, set `NEXT_PUBLIC_SITE_URL` in Vercel so Google uses it.

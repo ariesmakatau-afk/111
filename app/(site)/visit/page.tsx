@@ -10,6 +10,7 @@ import { IconBag, IconFlame, IconPin } from "@/components/Icons";
 export const metadata: Metadata = {
   title: "Visit — hours & location",
   description: `Find Yianni's Hellenic Yiros at ${fullAddress}. Opening hours, directions, pickup and delivery.`,
+  alternates: { canonical: "/visit" },
 };
 
 const ways = [

@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: "Our story",
   description:
     "Nearly fifty years of yiros on one corner of Hindley Street, and Yianni's since 2002. Why we still cook over charcoal.",
+  alternates: { canonical: "/story" },
 };
 
 const timeline = [
@@ -35,7 +36,7 @@ const timeline = [
   {
     when: "2025",
     title: "The renovation",
-    body: "We took the shop back to the walls and rebuilt it.",
+    body: "Back to the walls: new counter, floor, spit and fryer, and wheelchair access. Same fire, same crew.",
   },
   {
     when: "Tonight",

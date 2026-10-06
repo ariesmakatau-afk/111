@@ -1,4 +1,4 @@
-import { award, faqs, hours, site } from "@/lib/site";
+import { award, directionsHref, faqs, hours, site } from "@/lib/site";
 import { menuGroups } from "@/lib/menu";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -17,7 +17,9 @@ export default function StructuredData() {
     "@type": "Restaurant",
     name: site.name,
     image: `${site.url}/images/og.jpg`,
+    logo: `${site.url}/images/medallion.png`,
     url: site.url,
+    hasMap: directionsHref,
     telephone: site.phoneIntl,
     email: site.email,
     servesCuisine: ["Greek", "Yiros", "Souvlaki"],

@@ -11,6 +11,7 @@ import GreekKey from "@/components/GreekKey";
 export const metadata: Metadata = {
   title: "Parea — our people",
   description: "The crew on the spit and the regulars who keep coming back — the people of Yianni's on Hindley Street.",
+  alternates: { canonical: "/parea" },
 };
 
 // New uploads from /admin appear within a minute, no redeploy.

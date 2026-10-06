@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { heroVideo } from "@/lib/site";
 
@@ -10,11 +10,21 @@ import { heroVideo } from "@/lib/site";
  * visitors get the still frame. The video only takes over once it can play
  * smoothly — then it eases in over ~1.5s from a slightly closer scale, so
  * the handoff reads as the photo coming alive, not a cut to a video.
+ *
+ * The poster is one <picture>: phones download only the portrait photo,
+ * larger screens only the wide one (two separate priority images made every
+ * phone fetch both).
  */
 export default function HeroMedia() {
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const hasVideo = Boolean(heroVideo.src || heroVideo.webm);
+
+  const common = { alt: "", fill: true, priority: true, sizes: "100vw" } as const;
+  const {
+    props: { srcSet: wideSrcSet },
+  } = getImageProps({ ...common, src: heroVideo.poster });
+  const { props: posterProps } = getImageProps({ ...common, src: heroVideo.posterMobile });
 
   useEffect(() => {
     const v = video.current;
@@ -32,22 +42,16 @@ export default function HeroMedia() {
 
   return (
     <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-      <Image
-        src={heroVideo.poster}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className={`hidden object-cover object-[65%_50%] transition-opacity duration-[1800ms] ease-out sm:block ${hasVideo ? "" : "hero-drift"} ${playing ? "opacity-0" : "opacity-100"}`}
-      />
-      <Image
-        src={heroVideo.posterMobile}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className={`object-cover object-[50%_60%] transition-opacity duration-[1800ms] ease-out sm:hidden ${playing ? "opacity-0" : "opacity-100"}`}
-      />
+      <picture>
+        <source media="(min-width: 640px)" srcSet={wideSrcSet} sizes="100vw" />
+        <img
+          {...posterProps}
+          alt=""
+          className={`object-cover object-[50%_60%] transition-opacity duration-[1800ms] ease-out sm:object-[65%_50%] ${
+            hasVideo ? "" : "hero-drift"
+          } ${playing ? "opacity-0" : "opacity-100"}`}
+        />
+      </picture>
       {hasVideo && (
         <video
           ref={video}

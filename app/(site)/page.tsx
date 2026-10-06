@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { award, houseNumbers, rating, site } from "@/lib/site";
@@ -32,6 +33,8 @@ import { DealBanner } from "@/components/Deal";
 
 // Staff and customer photos uploaded in /admin show up within a minute.
 export const revalidate = 30;
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const byId = (id: string) => allProducts.find((p) => p.id === id)!;
 
@@ -155,7 +158,8 @@ export default async function HomePage() {
           <div className="fade-up flex flex-wrap items-center gap-2.5">
             <OpenStatus />
             <BoundaryCountdown />
-            <span className="status !pl-3">
+            {/* Phones already get the award in the stats row below; one mention is enough. */}
+            <span className="status !hidden !pl-3 sm:!inline-flex">
               <span aria-hidden="true" className="text-amber">✦</span> {award.by} · {award.title} · {award.date.replace("November", "Nov")}
             </span>
           </div>
@@ -241,7 +245,8 @@ export default async function HomePage() {
               <div data-reveal style={{ "--d": "120ms" } as React.CSSProperties}>
                 <p className="lede mt-8 max-w-xl">
                   Yianni took over this corner in {site.established} and rebuilt it around one rule: charcoal or nothing. In
-                  2023, delicious. 100 named us Best Yiros Shop. In {site.renovated} we rebuilt the shop and lit the same fire.
+                  2023 the delicious. 100 named us Best Yiros Shop. In {site.renovated} we rebuilt the shop — and lit the
+                  same fire.
                 </p>
                 <Link href="/story" className="mt-6 inline-flex items-center gap-2 font-bold text-blue hover:text-ember-deep">
                   Read our story <IconArrow />
@@ -432,7 +437,7 @@ export default async function HomePage() {
               <span aria-hidden="true" className="text-line">—</span>
               <span className="text-ember-deep">2</span> Pick a time
               <span aria-hidden="true" className="text-line">—</span>
-              <span className="text-ember-deep">3</span> Collect &amp; pay at the counter
+              <span className="text-ember-deep">3</span> Collect &amp; pay
             </p>
           </div>
 
@@ -481,12 +486,18 @@ export default async function HomePage() {
           <div className="mt-20 max-w-2xl" data-reveal>
             <p className="eyebrow">The usuals</p>
             <h3 className="h-md mt-4 text-blue-navy">
-              Four orders that <span className="blue-text">never</span> go wrong — one tap each.
+              Four orders that <span className="blue-text">never</span> go wrong. One tap each.
             </h3>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {/* Phones swipe through the four, like the signatures above, instead of scrolling past four tall cards. */}
+          <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-4">
             {usuals.map((u, i) => (
-              <div key={u.name} data-reveal style={{ "--d": `${i * 110}ms` } as React.CSSProperties}>
+              <div
+                key={u.name}
+                className="w-[82vw] max-w-[340px] shrink-0 snap-start md:w-auto md:max-w-none"
+                data-reveal
+                style={{ "--d": `${i * 110}ms` } as React.CSSProperties}
+              >
                 <UsualCard usual={u} featured={i === 1} />
               </div>
             ))}
@@ -500,7 +511,7 @@ export default async function HomePage() {
                   Track your <span className="fire-text">order.</span>
                 </h3>
                 <p className="lede mt-3 text-[0.95rem]">
-                  Paste your order code to see where it&rsquo;s at and the kitchen&rsquo;s wait time.
+                  Paste your order code to see where it&rsquo;s up to and how long the kitchen needs.
                 </p>
               </div>
               <OrderLookup />

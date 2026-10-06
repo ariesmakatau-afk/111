@@ -30,7 +30,9 @@ export default function KitchenStrip() {
           <IconFlame className="h-4 w-4 shrink-0 text-amber" />
           {now.open ? (
             <>
-              <b>Open now</b>, carving until {formatClockTime(now.today.close * 60)}
+              <span>
+                <b>Open now</b>, carving until {formatClockTime(now.today.close * 60)}
+              </span>
               <span className="kitchen-strip__count">{formatCountdown(now.secondsTo)}</span>
             </>
           ) : (

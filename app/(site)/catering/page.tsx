@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Catering",
   description:
     "Charcoal yiros catering in Adelaide — trays of lamb, chicken and pork off the spit, salad, pita, chips and garlic sauce for offices, parties and family nights.",
+  alternates: { canonical: "/catering" },
 };
 
 const trays = [

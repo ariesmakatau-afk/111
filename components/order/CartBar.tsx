@@ -21,9 +21,14 @@ export default function CartBar() {
 
   return (
     <>
-      <div className={`fixed inset-x-3 bottom-3 z-50 transition-transform duration-500 lg:hidden ${count ? "translate-y-0" : "translate-y-[150%]"}`}>
+      <div
+        className={`fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 transition-[transform,visibility] duration-500 lg:hidden ${
+          count ? "translate-y-0" : "invisible translate-y-[150%]"
+        }`}
+      >
         <button
           type="button"
+          tabIndex={count ? 0 : -1}
           onClick={() => setSheetOpen(true)}
           className={`btn btn-fire w-full justify-between !px-5 text-[1rem] ${bump ? "cart-bump" : ""}`}
           aria-haspopup="dialog"

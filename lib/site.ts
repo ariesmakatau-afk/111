@@ -8,8 +8,14 @@ export const site = {
   name: "Yianni's Hellenic Yiros",
   shortName: "Yianni's",
   tagline: "Real charcoal. Carved to order. Hindley Street since 2002.",
-  // Set once the domain is registered — used for canonical URLs & sitemap.
-  url: "https://yiannisonhindley.com.au",
+  // Used for canonical URLs, the sitemap and share previews, so it must be an
+  // address that actually loads. Set NEXT_PUBLIC_SITE_URL in Vercel once the
+  // shop's own domain is live; until then Vercel's production address is used.
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "https://yiannisonhindley.com.au"),
   address: {
     street: "270 Hindley Street",
     suburb: "Adelaide",
@@ -56,7 +62,9 @@ export const award = {
  * Best results: 1920×1080, 8–15 seconds, seamless loop, no audio, under 8MB.
  */
 export const heroVideo: { src: string | null; webm: string | null; poster: string; posterMobile: string } = {
-  src: "/video/spits.mp4",
+  // No video file has been uploaded yet; pointing at a missing file cost every
+  // visitor a failed download. Set to "/video/spits.mp4" once it's in place.
+  src: null,
   webm: null, // e.g. "/video/spits.webm"
   poster: "/images/lamb-plate.jpg",
   // Phones get a portrait photo: a wide one cropped to a tall screen shows only a sliver.

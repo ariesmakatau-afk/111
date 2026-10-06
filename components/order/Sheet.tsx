@@ -78,7 +78,7 @@ export default function Sheet({
         aria-label={label}
         tabIndex={-1}
         data-tone={tone === "dark" ? "dark" : undefined}
-        className={`sheet-panel relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-[28px] outline-none sm:rounded-[28px] ${
+        className={`sheet-panel relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-[28px] pb-[env(safe-area-inset-bottom)] outline-none sm:rounded-[28px] sm:pb-0 ${
           wide ? "sm:max-w-3xl" : "sm:max-w-xl"
         } ${tone === "dark" ? "surface-dark text-white" : "bg-white"} shadow-[0_40px_120px_-30px_rgba(7,24,58,.7)]`}
       >

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { igniteAt, prefersReducedMotion } from "@/lib/embers";
+import { useCart } from "./order/CartProvider";
 
 /** A coal you can press to ride the smoke back up. Appears past the hero. */
 export default function BackToTop() {
   const [show, setShow] = useState(false);
+  const { count } = useCart();
 
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > window.innerHeight * 1.15);
@@ -20,7 +22,7 @@ export default function BackToTop() {
       aria-label="Back to the top"
       aria-hidden={!show}
       tabIndex={show ? 0 : -1}
-      className={`back-to-top ${show ? "is-in" : ""}`}
+      className={`back-to-top ${show ? "is-in" : ""} ${count ? "has-cart" : ""}`}
       onClick={(e) => {
         igniteAt(e.currentTarget, 26);
         window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
