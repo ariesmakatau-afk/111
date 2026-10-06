@@ -146,5 +146,6 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - This CLAUDE.md (rules + superpowers + memory) added
 - Photos show straight after upload, Parea teaser on home, Deal banner + /menu deal
 - 111 refinement pass (Oct 2026): orange button shadows → navy; builder − 1 + stepper fixed; "The usuals" swipe on phones; iPhone safe-area for order bar/sheets; hero downloads one photo per device; missing hero video no longer requested; canonical URLs, robots rules, site address from Vercel; smaller favicon; light wording tidy-ups
-- Hero video: none uploaded yet. To add one, put it in `public/video/spits.mp4` and set `heroVideo.src` in `lib/site.ts`.
+- Hero video: spits over the coals, a tall clip for phones and a wide one for larger screens (`public/video/`, see its README). Fresh Dropbox photos on the fire section, Story/Visit and the Yiros Pack.
+- Delivery (Uber Direct) + card payments (Stripe) live in the **Yiannis** repo, not here.
 - Once the shop's own domain is live, set `NEXT_PUBLIC_SITE_URL` in Vercel so Google uses it.
