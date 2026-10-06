@@ -1,0 +1,23 @@
+{
+  "name": "Yianni's Kitchen",
+  "short_name": "Kitchen",
+  "id": "/kitchen",
+  "start_url": "/kitchen",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07183a",
+  "theme_color": "#0b3278",
+  "icons": [
+    {
+      "src": "/images/medallion-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
