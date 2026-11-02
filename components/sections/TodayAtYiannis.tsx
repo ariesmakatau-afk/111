@@ -38,7 +38,7 @@ export default function TodayAtYiannis() {
               The week at a <span className="fire-text !not-italic">glance</span>.
             </h3>
             <p className="mt-2 max-w-md text-[0.92rem] leading-relaxed text-muted">
-              Late nights Friday and Saturday. Mondays we close at 3:30pm.
+              Late nights Friday and Saturday. Mondays we close at 7pm.
             </p>
 
             <div className="mt-7">

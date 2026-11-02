@@ -64,7 +64,7 @@ const signatures = [
     img: "/images/greek-coffee.jpg",
     alt: "A Greek coffee in a meander-patterned cup reading Kalimera Ellada",
     tag: "Kalimera",
-    line: "Short black, one sugar. The way it's made at home — and yes, we open at nine.",
+    line: "Short black, one sugar. The way it's made at home — and yes, we open at ten.",
   },
 ];
 

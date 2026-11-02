@@ -97,6 +97,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
   - "Yiannis for decades"
   - "a yiros shop for 49+ years"
   - "brand since 2002"
+- Trading hours (owner-confirmed Nov 2026): open 10am daily; close Mon 7pm, Tue-Thu 8pm, Fri-Sat 10:30pm, Sun 8pm.
 - Photos come from Dropbox `/Posts/Social`, the real shop shots.
 - Pages: `/` home, `/menu`, `/order`, `/catering`, `/parea`, `/story`.
 - Staff pages:

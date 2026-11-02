@@ -73,7 +73,7 @@ export type ShopNow = {
   lastSlotMin: number | null;
   /** Whether "as soon as possible" is currently on the table. */
   asapAvailable: boolean;
-  /** e.g. "9:15am" — the first slot of the next trading session. */
+  /** e.g. "10:15am" — the first slot of the next trading session. */
   firstSlotLabel: string;
 };
 
@@ -179,9 +179,9 @@ export function momentOf(now: ShopNow): Moment {
     return {
       key: "banked",
       kicker: `The coals are banked · back at ${formatTime(now.boundaryMin)}`,
-      title: beforeTodayOpen ? "First fire at nine." : "The fire is sleeping.",
+      title: beforeTodayOpen ? "First fire at ten." : "The fire is sleeping.",
       body: beforeTodayOpen
-        ? "We open at nine. Order now and the first wrap comes off the spit at the first knock — pay at the counter when you're here."
+        ? "We open at ten. Order now and the first wrap comes off the spit at the first knock — pay at the counter when you're here."
         : `We're back at ${formatTime(now.today.open)}. Send tomorrow's lunch through now and skip the queue it always creates.`,
       lines: beforeTodayOpen
         ? [cfg("yiros", "regular", ["lamb"], ["Garlic"]), cfg("greek-coffee", "standard", [], [])]
@@ -190,11 +190,11 @@ export function momentOf(now: ShopNow): Moment {
     };
   }
 
-  if (dayIndex === 0 && min >= 13 * MIN) {
+  if (dayIndex === 0 && min >= 16.5 * MIN) {
     return {
       key: "monday",
       kicker: "Monday's last call",
-      title: "Mondays we bank the coals at 3:30pm.",
+      title: "Mondays we bank the coals at 7pm.",
       body: "If the day has gone sideways, an AB Pack fixes that. Order now, collect it on your way through Hindley, pay at the counter.",
       lines: [cfg("ab-pack", "small", ["chicken"], ["Garlic", "BBQ", "Hot chilli"])],
       cta: "Fix the day",
@@ -248,8 +248,8 @@ export function momentOf(now: ShopNow): Moment {
   return {
     key: "early",
     kicker: "Early doors",
-    title: "Nine o'clock on Hindley.",
-    body: "Coffee first, then whatever you like. The spits are up, the shop's quiet, and nobody has judged your 9am yiros yet.",
+    title: "Ten o'clock on Hindley.",
+    body: "Coffee first, then whatever you like. The spits are up, the shop's quiet, and nobody has judged your 10am yiros yet.",
     lines: [cfg("greek-coffee", "standard", [], []), cfg("veggie-roll", "standard", [], ["Garlic"])],
     cta: "Start the day",
   };

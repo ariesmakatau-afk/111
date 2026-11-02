@@ -5,13 +5,13 @@ import { formatTime } from "@/lib/hours";
 import { useShopNow } from "./useShopNow";
 
 /**
- * Seven bars: how long the fire burns each day, in a 9am–11pm window, with
+ * Seven bars: how long the fire burns each day, in a 10am–11pm window, with
  * a live marker for *now* on today's row. The late Friday/Saturday nights
  * are visible at a glance — that's the whole point of the widget.
  */
 export default function WeekStrip({ tone = "light" }: { tone?: "light" | "dark" }) {
   const now = useShopNow(15_000);
-  const WINDOW_START = 9 * 60;
+  const WINDOW_START = 10 * 60;
   const WINDOW_END = 23 * 60;
   const pct = (m: number) => ((m - WINDOW_START) / (WINDOW_END - WINDOW_START)) * 100;
 

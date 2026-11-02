@@ -84,13 +84,13 @@ export const mapEmbedSrc = `https://www.google.com/maps?q=${mapsQuery}&output=em
  * Index 0 = Monday. Client-confirmed.
  */
 export const hours: { day: string; short: string; open: number; close: number }[] = [
-  { day: "Monday", short: "Mon", open: 9 * 60, close: 15 * 60 + 30 },
-  { day: "Tuesday", short: "Tue", open: 9 * 60, close: 20 * 60 },
-  { day: "Wednesday", short: "Wed", open: 9 * 60, close: 20 * 60 },
-  { day: "Thursday", short: "Thu", open: 9 * 60, close: 20 * 60 },
-  { day: "Friday", short: "Fri", open: 9 * 60, close: 22 * 60 + 30 },
-  { day: "Saturday", short: "Sat", open: 9 * 60, close: 22 * 60 + 30 },
-  { day: "Sunday", short: "Sun", open: 9 * 60, close: 20 * 60 },
+  { day: "Monday", short: "Mon", open: 10 * 60, close: 19 * 60 },
+  { day: "Tuesday", short: "Tue", open: 10 * 60, close: 20 * 60 },
+  { day: "Wednesday", short: "Wed", open: 10 * 60, close: 20 * 60 },
+  { day: "Thursday", short: "Thu", open: 10 * 60, close: 20 * 60 },
+  { day: "Friday", short: "Fri", open: 10 * 60, close: 22 * 60 + 30 },
+  { day: "Saturday", short: "Sat", open: 10 * 60, close: 22 * 60 + 30 },
+  { day: "Sunday", short: "Sun", open: 10 * 60, close: 20 * 60 },
 ];
 
 export const TIMEZONE = "Australia/Adelaide";
