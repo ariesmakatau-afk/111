@@ -31,6 +31,7 @@ export default function PhotoWall({ kind, initial, limit }: { kind: "team" | "cu
   const [caption, setCaption] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const team = kind === "team";
@@ -123,17 +124,33 @@ export default function PhotoWall({ kind, initial, limit }: { kind: "team" | "cu
           if (e.target.files?.length) uploadFiles(e.target.files);
         }}
       />
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button type="button" disabled={busy || photos.length >= limit} onClick={() => input.current?.click()} className="btn btn-fire btn-sm">
-          {busy ? "Working…" : photos.length >= limit ? "Wall is full" : "Add photos"}
-        </button>
-        <span className="text-xs text-muted">
-          {photos.length === 0
-            ? `None on the site yet — add 1 or 2, or as many as you like (up to ${limit}).`
-            : `${photos.length} on the site${photos.length === 1 ? "" : ""} · JPG, PNG or WEBP up to 8MB`}
+      <button
+        type="button"
+        disabled={busy || photos.length >= limit}
+        onClick={() => input.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!busy && photos.length < limit) setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          if (e.dataTransfer.files?.length) uploadFiles(e.dataTransfer.files);
+        }}
+        className={`press-btn mt-4 flex min-h-[88px] w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed px-4 py-5 text-center ${
+          dragOver ? "border-blue bg-mist" : "border-blue/30 bg-white"
+        } disabled:opacity-60`}
+      >
+        <span className="text-lg font-extrabold text-blue-navy">
+          {busy ? "Uploading…" : photos.length >= limit ? "This wall is full" : "Upload photos"}
         </span>
-      </div>
-      <p className="mt-2 text-xs text-muted">The website only shows photos you actually upload. It will never pad the wall with empty boxes.</p>
+        <span className="text-sm font-semibold text-ink">
+          {photos.length >= limit
+            ? "Remove one before adding another."
+            : `Tap here, or drop photos. ${photos.length} of ${limit} on the site. JPG, PNG or WEBP.`}
+        </span>
+      </button>
       {msg && (
         <p role="status" className={`mt-3 text-sm font-semibold ${msg.ok ? "text-green-700" : "text-ember-deep"}`}>
           {msg.text}

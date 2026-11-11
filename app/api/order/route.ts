@@ -84,6 +84,14 @@ export async function POST(request: NextRequest) {
         console.error("[api/order] could not save order:", err, err2);
       }
     }
+    // The kitchen screen only sees what is saved. Don't tell the customer
+    // the order went through if the board will never get it.
+    if (!orderId) {
+      return NextResponse.json(
+        { error: "We couldn't send that to the kitchen. Please call the shop." },
+        { status: 502 }
+      );
+    }
   }
 
   try {

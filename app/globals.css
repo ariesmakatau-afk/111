@@ -27,7 +27,8 @@
   --sky: #9cc0f5;
 
   --ink: #0c1628;
-  --muted: #55607a;
+  /* Dark enough for body copy on white and porcelain (about 8:1). */
+  --muted: #3a4660;
 
   /* Night over the Aegean: blacks with blue in them, never neutral grey-black. */
   --char-950: #040a17;
@@ -2492,4 +2493,544 @@ html:not(.js) .review-deck__controls {
 .hero-video.is-playing {
   opacity: 1;
   transform: scale(1);
+}
+
+/* Low-opacity white on the charcoal sections was failing contrast. */
+[data-tone="dark"] .text-white\/30,
+[data-tone="dark"] .text-white\/35,
+[data-tone="dark"] .text-white\/40,
+[data-tone="dark"] .text-white\/45,
+[data-tone="dark"] .text-white\/50,
+[data-tone="dark"] .text-white\/55,
+[data-tone="dark"] .text-white\/60 {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+/* --------------------------------------------------------------------------
+   Kitchen — white, full-screen, closer to the Uber Eats restaurant app
+   -------------------------------------------------------------------------- */
+.ue-app {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #111;
+  font-family: var(--font-sans);
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.ue-app button,
+.ue-app a {
+  cursor: pointer;
+}
+.ue-app input,
+.ue-app textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+.ue-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 8px 16px;
+  padding-top: max(8px, env(safe-area-inset-top));
+  border-bottom: 1px solid #e6e6e6;
+  background: #fff;
+}
+.ue-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+.ue-brand strong {
+  font-size: 1.15rem;
+}
+.ue-brand span,
+.ue-clock span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #3a3a3a;
+}
+.ue-clock {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.ue-clock span {
+  display: block;
+  margin-top: 2px;
+  font-weight: 700;
+}
+.ue-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 4px;
+  border: 1px solid #d7d7d7;
+  border-radius: 999px;
+  background: #fff;
+  padding: 8px 14px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #111;
+}
+.ue-status i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #067a43;
+}
+.ue-status.is-paused i {
+  background: #b42318;
+}
+.ue-top-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ue-textbtn,
+.ue-iconbtn {
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0 14px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #111;
+}
+.ue-iconbtn {
+  border: 1px solid #d7d7d7;
+  background: #fff;
+}
+.ue-banner,
+.ue-error {
+  margin: 0;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.ue-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  background: #fff6e8;
+  color: #5c3b00;
+  border-bottom: 1px solid #f0dfc0;
+}
+.ue-error {
+  background: #fde8e6;
+  color: #8a1c13;
+}
+.ue-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+.ue-list {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  border-right: 1px solid #ececec;
+}
+.ue-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-bottom: 1px solid #ececec;
+  background: #fff;
+}
+.ue-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  border-bottom: 3px solid transparent;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #3a3a3a;
+}
+.ue-tab.is-on {
+  border-bottom-color: #111;
+  color: #111;
+}
+.ue-tab span {
+  min-width: 1.4rem;
+  border-radius: 999px;
+  background: #f2f2f2;
+  padding: 2px 7px;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.ue-tab span.is-hot {
+  background: #111;
+  color: #fff;
+}
+.ue-rows {
+  margin: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  list-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ue-row {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid #efefef;
+  padding: 16px 16px 16px 18px;
+  text-align: left;
+  background: #fff;
+}
+.ue-row.is-on {
+  background: #f6f6f6;
+  box-shadow: inset 4px 0 0 #111;
+}
+.ue-row.is-new strong::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #067a43;
+  vertical-align: 1px;
+}
+.ue-row-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 1.15rem;
+}
+.ue-row-top span,
+.ue-row-sub,
+.ue-meta {
+  color: #3a3a3a;
+  font-weight: 650;
+}
+.ue-row-sub {
+  font-size: 0.95rem;
+}
+.ue-detail {
+  display: none;
+  min-width: 0;
+  flex: 1.2;
+  overflow: auto;
+  background: #fff;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+.ue-body.is-detail .ue-list {
+  display: none;
+}
+.ue-body.is-detail .ue-detail {
+  display: block;
+}
+.ue-ticket {
+  padding: 8px 20px 28px;
+}
+.ue-back {
+  min-height: 44px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111;
+}
+.ue-back::before {
+  content: "‹ ";
+}
+.ue-kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #3a3a3a;
+}
+.ue-ticket-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ue-ticket h2 {
+  margin: 4px 0 0;
+  font-family: var(--font-sans);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.ue-phone {
+  flex-shrink: 0;
+  border: 1px solid #d7d7d7;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 800;
+  color: #111;
+}
+.ue-pickup {
+  margin: 16px 0 0;
+  font-size: 1.05rem;
+}
+.ue-pickup span {
+  margin-left: 8px;
+  border-radius: 999px;
+  background: #f3f3f3;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.ue-pickup span.is-late {
+  background: #fde8e6;
+  color: #8a1c13;
+}
+.ue-items {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #ececec;
+}
+.ue-items li {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 14px 0;
+  font-size: 1.08rem;
+}
+.ue-qty {
+  display: grid;
+  height: 32px;
+  min-width: 32px;
+  place-items: center;
+  border-radius: 8px;
+  background: #f2f2f2;
+  font-weight: 800;
+}
+.ue-items strong {
+  display: block;
+}
+.ue-items em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #3a3a3a;
+}
+.ue-items em .is-off {
+  color: #9b1c1c;
+  font-weight: 800;
+}
+.ue-note {
+  margin: 14px 0 0;
+  border-radius: 12px;
+  background: #fff6e8;
+  padding: 12px 14px;
+  color: #3d2a00;
+  font-weight: 650;
+}
+.ue-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 14px 0 0;
+  font-size: 1.05rem;
+}
+.ue-total strong {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.ue-times {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  overflow-x: auto;
+}
+.ue-times button {
+  min-height: 48px;
+  flex: 1 0 auto;
+  border: 1px solid #d5d5d5;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0 14px;
+  font-weight: 800;
+}
+.ue-times button.is-on {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+.ue-hint {
+  margin: 8px 0 0;
+  color: #3a3a3a;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+.ue-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+.ue-btn {
+  min-height: 56px;
+  width: 100%;
+  border-radius: 12px;
+  background: #111;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.ue-btn--ghost {
+  background: #fff;
+  color: #111;
+  border: 1px solid #d5d5d5;
+}
+.ue-empty {
+  margin: 0;
+  padding: 48px 24px;
+  text-align: center;
+  color: #3a3a3a;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.ue-undo,
+.ue-silence {
+  position: fixed;
+  left: 50%;
+  z-index: 40;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+}
+.ue-undo {
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #111;
+  color: #fff;
+  padding: 12px 12px 12px 18px;
+  font-weight: 750;
+}
+.ue-undo button {
+  min-height: 40px;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0 14px;
+  font-weight: 800;
+  color: #111;
+}
+.ue-silence {
+  bottom: max(18px, env(safe-area-inset-bottom));
+  min-height: 52px;
+  background: #9b1c1c;
+  color: #fff;
+  padding: 0 22px;
+  font-weight: 800;
+}
+.ue-arm {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  padding: 32px 24px;
+  text-align: center;
+}
+.ue-arm h1 {
+  margin: 8px 0 0;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.ue-arm p {
+  max-width: 28rem;
+  margin: 12px auto 0;
+  color: #2c2c2c;
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+.ue-arm .ue-btn {
+  max-width: 22rem;
+  margin: 28px auto 0;
+}
+.ue-app:has(.ue-undo) .ue-silence {
+  bottom: calc(max(18px, env(safe-area-inset-bottom)) + 64px);
+}
+@media (max-width: 959px) {
+  .ue-actions {
+    position: sticky;
+    bottom: 0;
+    margin-top: 12px;
+    background: #fff;
+    padding-top: 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    box-shadow: 0 -12px 24px rgba(255, 255, 255, 0.9);
+  }
+  .ue-times {
+    overflow: visible;
+  }
+  .ue-times button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 4px;
+    font-size: 0.92rem;
+  }
+}
+@media (max-width: 720px) {
+  .ue-top {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .ue-clock {
+    display: none;
+  }
+  .ue-brand {
+    margin-right: auto;
+  }
+  .ue-status {
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  .ue-top-actions {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+  .ue-textbtn,
+  .ue-iconbtn {
+    padding: 0 10px;
+    font-size: 0.85rem;
+  }
+}
+@media (min-width: 960px) {
+  .ue-list {
+    flex: 0 0 400px;
+  }
+  .ue-detail,
+  .ue-body.is-detail .ue-list {
+    display: block;
+  }
+  .ue-back {
+    display: none;
+  }
+  .ue-ticket {
+    max-width: 720px;
+    padding: 28px 36px 40px;
+  }
 }

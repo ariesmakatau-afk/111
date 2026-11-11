@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ALERT_SOUNDS,
   DEFAULT_SOUND,
   getAlertVolume,
   playAlert,
+  playConfirm,
   preloadAlert,
   setAlertVolume,
   startUrgentLoop,
@@ -13,20 +15,22 @@ import {
   type AlertSoundId,
 } from "@/lib/alertSounds";
 import { formatMoney } from "@/lib/menu";
-import { igniteAt } from "@/lib/embers";
-import StaffShell from "./StaffShell";
-import AcceptSheet from "./kitchen/AcceptSheet";
+import StaffHeartbeat from "./StaffHeartbeat";
+import { endTab } from "./staffTab";
 import OrderOptionsSheet from "./kitchen/OrderOptionsSheet";
 import KitchenSettingsSheet from "./kitchen/KitchenSettingsSheet";
-import { bump, type Order, type Patch } from "./kitchen/types";
+import { DEFAULT_WAIT, WAIT_OPTIONS, bump, itemCount, type Order, type Patch } from "./kitchen/types";
 
-// The kitchen board. Each ticket has one big action (Accept, then Collected)
-// and a ⋯ menu for everything else; shop-wide switches and the alarm live in
-// Settings. A new order sets off an alarm that keeps going until silenced.
+// White, full-screen order board modelled on the Uber Eats restaurant app:
+// a list on the left, the ticket on the right, one thumb-sized action.
+// Orders from the website land here. The saved alarm tunes are unchanged;
+// a short pager sting plays first so a new ticket is obvious in a loud shop.
 
-const POLL_MS = 8000;
+const POLL_MS = 4000;
 
-function useClock(ms = 30000) {
+type Tab = "new" | "preparing" | "done";
+
+function useClock(ms = 15000) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = window.setInterval(() => setNow(Date.now()), ms);
@@ -35,7 +39,6 @@ function useClock(ms = 30000) {
   return now;
 }
 
-/** Keep the tablet screen on while the board is open (where supported). */
 function useWakeLock(active: boolean) {
   useEffect(() => {
     if (!active || !("wakeLock" in navigator)) return;
@@ -54,49 +57,63 @@ function useWakeLock(active: boolean) {
   }, [active]);
 }
 
+function ago(created: string, clock: number): string {
+  const mins = Math.max(0, Math.floor((clock - new Date(created).getTime()) / 60000));
+  if (mins < 1) return "Just now";
+  if (mins === 1) return "1 min ago";
+  return `${mins} min ago`;
+}
+
 export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
   const [sound, setSound] = useState<AlertSoundId>(DEFAULT_SOUND);
   const [audioReady, setAudioReady] = useState(false);
   const [volume, setVolume] = useState(1);
   const [loudMode, setLoudMode] = useState(true);
-  const [unacked, setUnacked] = useState(0);
   const [paused, setPaused] = useState<boolean | null>(null);
   const [busyMinutes, setBusyMinutes] = useState(0);
   const [soldOutNote, setSoldOutNote] = useState<string | null>(null);
-  const [hotIds, setHotIds] = useState<Set<string>>(new Set());
-  const [acceptFor, setAcceptFor] = useState<Order | null>(null);
   const [optionsFor, setOptionsFor] = useState<Order | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>("new");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
+  const [waits, setWaits] = useState<Record<string, number>>({});
+  const [undo, setUndo] = useState<{ id: string; name: string } | null>(null);
+  const [alarming, setAlarming] = useState(false);
   const knownIds = useRef<Set<string>>(new Set());
   const firstLoad = useRef(true);
   const stopLoop = useRef<(() => void) | null>(null);
+  const undoTimer = useRef(0);
   const clock = useClock();
   const wallNow = useWallClock();
   useWakeLock(audioReady);
 
+  const onReady = useCallback(() => setReady(true), []);
+
   const stopUrgent = useCallback(() => {
     stopLoop.current?.();
     stopLoop.current = null;
+    setAlarming(false);
   }, []);
 
   const beep = useCallback(
     (count: number) => {
       if (soundOn) {
-        // The loop plays straight away, so don't also play a one-off on top.
         if (loudMode) {
           if (!stopLoop.current) stopLoop.current = startUrgentLoop(sound);
         } else playAlert(sound);
       }
-      bump([400, 150, 400, 150, 400]);
-      setUnacked((n) => n + count);
+      setAlarming(true);
+      bump([180, 80, 180, 80, 280]);
       if (typeof Notification !== "undefined" && Notification.permission === "granted") {
         try {
-          new Notification(`${count} new order${count > 1 ? "s" : ""} at Yianni's`, {
-            body: "Accept it on the kitchen board.",
+          new Notification(count === 1 ? "New order" : `${count} new orders`, {
+            body: "Open the kitchen screen and accept it.",
             tag: "yiannis-new-order",
           });
         } catch {}
@@ -118,15 +135,9 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
       const incoming = next.filter((o) => o.status === "new" && !knownIds.current.has(o.id));
       if (!firstLoad.current && incoming.length > 0) {
         beep(incoming.length);
-        const ids = new Set(incoming.map((o) => o.id));
-        setHotIds((prev) => new Set([...prev, ...ids]));
-        window.setTimeout(() => {
-          setHotIds((prev) => {
-            const copy = new Set(prev);
-            ids.forEach((id) => copy.delete(id));
-            return copy;
-          });
-        }, 7000);
+        setTab("new");
+        setSelectedId(incoming[incoming.length - 1].id);
+        setShowDetail(true);
       }
       next.forEach((o) => knownIds.current.add(o.id));
       firstLoad.current = false;
@@ -159,21 +170,29 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
   }, []);
 
   useEffect(() => {
+    if (!ready) return;
     load();
     const id = window.setInterval(load, POLL_MS);
     return () => window.clearInterval(id);
-  }, [load]);
+  }, [load, ready]);
 
   useEffect(() => () => stopUrgent(), [stopUrgent]);
-
-  // Have the chosen alarm downloaded before the first order arrives.
+  useEffect(() => () => window.clearTimeout(undoTimer.current), []);
   useEffect(() => preloadAlert(sound), [sound]);
 
   function armSound() {
     setAudioReady(true);
-    // A short test so staff know it works, not the whole 20-second file.
+    const waiting = orders.filter((o) => o.status === "new");
+    if (waiting.length > 0 && loudMode) {
+      if (!stopLoop.current) stopLoop.current = startUrgentLoop(sound);
+      setAlarming(true);
+      setTab("new");
+      setSelectedId(waiting[waiting.length - 1].id);
+      setShowDetail(true);
+      return;
+    }
     playAlert(sound);
-    window.setTimeout(stopAlert, 1500);
+    window.setTimeout(stopAlert, 900);
   }
   function chooseSound(id: AlertSoundId) {
     setSound(id);
@@ -203,11 +222,16 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
   function ack() {
     stopUrgent();
     stopAlert();
-    setUnacked(0);
   }
   function changeVolume(v: number) {
     setVolume(v);
     setAlertVolume(v);
+  }
+
+  async function signOut() {
+    endTab();
+    await fetch("/api/staff/session", { method: "DELETE" });
+    window.location.href = "/staff";
   }
 
   async function saveSettings(patchBody: Record<string, unknown>) {
@@ -216,7 +240,7 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patchBody),
     }).catch(() => null);
-    if (!res?.ok) setError("A switch didn't save — check the database is configured.");
+    if (!res?.ok) setError("That didn't save. Check the connection and try again.");
     return res?.ok ?? false;
   }
 
@@ -235,7 +259,6 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
   }
 
   const patch: Patch = async (id, patchBody) => {
-    // Any action on the board means someone's looking: silence the alarm.
     ack();
     setOrders((prev) =>
       prev.map((o) => {
@@ -258,138 +281,199 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
       });
       if (!res.ok) throw new Error();
     } catch {
-      setError("That change didn't save — reloading.");
+      setError("That change didn't save. Pulling the latest orders.");
       load();
     }
   };
 
-  const fresh = orders.filter((o) => o.status === "new");
-  const cooking = orders.filter((o) => o.status === "accepted");
-  const done = orders.filter((o) => o.status === "collected" || o.status === "rejected");
-  const queueMinutes = cooking.length ? Math.max(...cooking.map((o) => Math.floor((clock - new Date(o.created_at).getTime()) / 60000))) : 0;
+  const fresh = useMemo(() => orders.filter((o) => o.status === "new"), [orders]);
+  const cooking = useMemo(() => orders.filter((o) => o.status === "accepted"), [orders]);
+  const done = useMemo(() => orders.filter((o) => o.status === "collected" || o.status === "rejected"), [orders]);
+  const visible = tab === "new" ? fresh : tab === "preparing" ? cooking : done;
+  const selected = visible.find((o) => o.id === selectedId) ?? visible[0] ?? null;
+
+  function pickTab(next: Tab) {
+    setTab(next);
+    setShowDetail(false);
+  }
+
+  function openOrder(o: Order) {
+    setSelectedId(o.id);
+    setShowDetail(true);
+  }
+
+  function accept(o: Order) {
+    const mins = waits[o.id] ?? DEFAULT_WAIT;
+    playConfirm();
+    bump([18, 40, 30]);
+    patch(o.id, { status: "accepted", waitMinutes: mins });
+    setTab("preparing");
+    setSelectedId(o.id);
+  }
+
+  function collect(o: Order) {
+    playConfirm();
+    bump([12, 30, 18]);
+    patch(o.id, { status: "collected" });
+    setUndo({ id: o.id, name: o.customer_name });
+    window.clearTimeout(undoTimer.current);
+    undoTimer.current = window.setTimeout(() => setUndo(null), 5000);
+    setShowDetail(false);
+    setTab("preparing");
+  }
+
+  const needsArm = ready && soundOn && !audioReady;
 
   return (
-    <StaffShell
-      dark
-      showAdmin={isAdmin}
-      right={
-        <>
-          <span className="mr-1 hidden font-serif text-2xl tabular-nums text-white/90 sm:inline">{wallNow}</span>
-          {fresh.length > 0 && (
-            <span className="kb-new-flag rounded-full bg-ember px-3 py-1.5 text-xs font-extrabold text-white">{fresh.length} incoming</span>
+    <div className="ue-app">
+      <StaffHeartbeat onReady={onReady} />
+
+      <header className="ue-top">
+        <div className="ue-brand">
+          <strong>Yianni&rsquo;s</strong>
+          <span>Kitchen</span>
+        </div>
+        <p className="ue-clock" aria-live="off">
+          {wallNow}
+          <span>Adelaide</span>
+        </p>
+        <button
+          type="button"
+          className={`ue-status ${paused ? "is-paused" : "is-on"}`}
+          onClick={() => setSettingsOpen(true)}
+        >
+          <i />
+          {paused ? "Orders paused" : paused === null ? "Orders" : "Accepting orders"}
+        </button>
+        <div className="ue-top-actions">
+          {isAdmin && (
+            <Link href="/admin" className="ue-textbtn">
+              Edit site
+            </Link>
           )}
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            className="press-btn rounded-full border border-white/20 px-4 py-1.5 text-sm font-bold text-white/85 hover:border-amber"
-          >
-            ⚙ Settings
+          <button type="button" className="ue-iconbtn" onClick={() => setSettingsOpen(true)} aria-label="Kitchen settings">
+            Settings
           </button>
-        </>
-      }
-    >
-      {unacked > 0 && <div className="kb-alarm-flash" aria-hidden="true" />}
-      {unacked > 0 && (
-        <div className="kb-urgentbar" role="alert">
-          <span>
-            {unacked} new order{unacked > 1 ? "s" : ""}
-          </span>
-          <button
-            type="button"
-            onClick={(e) => {
-              igniteAt(e.currentTarget, 20, 0.8);
-              bump();
-              ack();
-            }}
-            className="press-btn press-btn--light rounded-full px-6 py-2.5 text-base"
-          >
-            Silence alarm
+          <button type="button" className="ue-textbtn" onClick={signOut}>
+            Sign out
           </button>
         </div>
+      </header>
+
+      {(paused || busyMinutes > 0 || soldOutNote) && (
+        <button type="button" className="ue-banner" onClick={() => setSettingsOpen(true)}>
+          {paused && <b>Online orders are paused</b>}
+          {busyMinutes > 0 && <b>Add {busyMinutes} min to every wait</b>}
+          {soldOutNote && <span>{soldOutNote}</span>}
+        </button>
       )}
 
-      {soundOn && !audioReady && (
-        <div className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4">
-          <button type="button" onClick={armSound} className="press-btn press-btn--accept px-7 py-4 text-lg shadow-2xl">
-            Tap to turn the alarm on
-          </button>
-        </div>
+      {error && (
+        <p role="alert" className="ue-error">
+          {error}
+        </p>
       )}
 
-      <main className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6">
-        {error && (
-          <p role="alert" className="mb-4 rounded-2xl bg-ember/15 px-4 py-3 text-sm font-semibold text-amber">
-            {error}
-          </p>
-        )}
-
-        {/* Only what's switched on shows here; tapping it opens Settings. */}
-        {(paused || busyMinutes > 0 || soldOutNote) && (
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            className="mb-6 flex w-full flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left text-sm font-bold"
-          >
-            {paused && <span className="rounded-full bg-ember px-3 py-1 text-white">Online orders paused</span>}
-            {busyMinutes > 0 && <span className="rounded-full bg-amber/20 px-3 py-1 text-amber">Pacing +{busyMinutes} min</span>}
-            {soldOutNote && <span className="rounded-full bg-white/10 px-3 py-1 text-white/85">{soldOutNote}</span>}
-          </button>
-        )}
-
-        {loading ? (
-          <p className="py-24 text-center text-white/50">Loading orders…</p>
-        ) : (
-          <div className="grid gap-8 xl:grid-cols-2">
-            <Column title="Incoming" count={fresh.length} tone="new" empty="Nothing waiting. New orders land here with the alarm.">
-              {fresh.map((o) => (
-                <OrderCard key={o.id} order={o} clock={clock} busy={busyMinutes} hot={hotIds.has(o.id)} onAccept={() => setAcceptFor(o)} onOptions={() => setOptionsFor(o)} onPatch={patch} />
-              ))}
-            </Column>
-            <Column
-              title="In progress"
-              count={cooking.length}
-              tone="cooking"
-              empty="Accepted orders wait here until they're collected."
-              note={cooking.length ? `oldest ${queueMinutes}m` : undefined}
-            >
-              {cooking.map((o) => (
-                <OrderCard key={o.id} order={o} clock={clock} busy={busyMinutes} hot={false} onAccept={() => {}} onOptions={() => setOptionsFor(o)} onPatch={patch} />
-              ))}
-            </Column>
-          </div>
-        )}
-
-        {done.length > 0 && (
-          <details className="mt-10 rounded-2xl border border-white/10 p-4">
-            <summary className="cursor-pointer text-sm font-bold text-white/60">Finished in the last day ({done.length})</summary>
-            <ul className="mt-3 space-y-1.5">
-              {done.map((o) => (
-                <li key={o.id} className="flex flex-wrap items-center gap-3 text-sm text-white/60">
-                  <span className={o.status === "rejected" ? "text-ember" : "text-green-400"}>{o.status === "rejected" ? "✕" : "✓"}</span>
-                  <span className="font-bold text-white/85">{o.customer_name}</span>
-                  <span>{o.pickup_time}</span>
-                  {o.total != null && <span className="tabular-nums">{formatMoney(Number(o.total))}</span>}
-                  {o.status === "collected" && (
-                    <button type="button" className="press-btn text-xs font-bold text-amber underline" onClick={() => patch(o.id, { status: "accepted" })}>
-                      undo
-                    </button>
-                  )}
+      {!ready || loading ? (
+        <p className="ue-empty">Loading orders…</p>
+      ) : (
+        <div className={`ue-body ${showDetail ? "is-detail" : ""}`}>
+          <section className="ue-list" aria-label="Orders">
+            <div className="ue-tabs" role="tablist">
+              <TabButton id="new" label="New" count={fresh.length} hot={fresh.length > 0} current={tab} onPick={pickTab} />
+              <TabButton id="preparing" label="Preparing" count={cooking.length} current={tab} onPick={pickTab} />
+              <TabButton id="done" label="Done" count={done.length} current={tab} onPick={pickTab} />
+            </div>
+            <ul className="ue-rows">
+              {visible.length === 0 ? (
+                <li className="ue-empty">
+                  {tab === "new"
+                    ? "No new orders. When someone orders on the website, it shows up here."
+                    : tab === "preparing"
+                      ? "Nothing on the spit. Accepted orders wait here until they're handed over."
+                      : "Nothing finished today yet."}
                 </li>
-              ))}
+              ) : (
+                visible.map((o) => (
+                  <li key={o.id}>
+                    <button
+                      type="button"
+                      className={`ue-row ${selected?.id === o.id ? "is-on" : ""} ${o.status === "new" ? "is-new" : ""}`}
+                      onClick={() => openOrder(o)}
+                    >
+                      <span className="ue-row-top">
+                        <strong>{o.customer_name}</strong>
+                        <span>{ago(o.created_at, clock)}</span>
+                      </span>
+                      <span className="ue-row-sub">
+                        {itemCount(o)} {itemCount(o) === 1 ? "item" : "items"} · {o.pickup_time}
+                        {o.total != null ? ` · ${formatMoney(Number(o.total))}` : ""}
+                      </span>
+                    </button>
+                  </li>
+                ))
+              )}
             </ul>
-          </details>
-        )}
-      </main>
+          </section>
 
-      <AcceptSheet
-        order={acceptFor}
-        busy={busyMinutes}
-        onClose={() => setAcceptFor(null)}
-        onAccept={(o, mins) => {
-          setAcceptFor(null);
-          patch(o.id, { status: "accepted", waitMinutes: mins });
-        }}
-      />
+          <section className="ue-detail" aria-live="polite">
+            {selected && (selected.status === "new" || selected.status === "accepted" || tab === "done") ? (
+              <Ticket
+                order={selected}
+                clock={clock}
+                busy={busyMinutes}
+                wait={waits[selected.id] ?? selected.wait_minutes ?? DEFAULT_WAIT}
+                onWait={(m) => setWaits((w) => ({ ...w, [selected.id]: m }))}
+                onAccept={() => accept(selected)}
+                onCollect={() => collect(selected)}
+                onBack={() => setShowDetail(false)}
+                onMore={() => setOptionsFor(selected)}
+                onUndoCollect={() => patch(selected.id, { status: "accepted" })}
+              />
+            ) : (
+              <p className="ue-empty">Pick an order.</p>
+            )}
+          </section>
+        </div>
+      )}
+
+      {undo && (
+        <div className="ue-undo" role="status">
+          <span>{undo.name.split(" ")[0]} marked collected</span>
+          <button
+            type="button"
+            onClick={() => {
+              patch(undo.id, { status: "accepted" });
+              setUndo(null);
+              setTab("preparing");
+              setSelectedId(undo.id);
+              setShowDetail(true);
+            }}
+          >
+            Undo
+          </button>
+        </div>
+      )}
+
+      {alarming && fresh.length > 0 && (
+        <button type="button" className="ue-silence" onClick={ack}>
+          Silence alarm
+        </button>
+      )}
+
+      {needsArm && (
+        <div className="ue-arm">
+          <div>
+            <p className="ue-kicker">Kitchen</p>
+            <h1>Tap to hear new orders</h1>
+            <p>This screen stays on. A new website order plays the alarm until you accept it.</p>
+            <button type="button" className="ue-btn" onClick={armSound}>
+              Open the kitchen
+            </button>
+          </div>
+        </div>
+      )}
+
       <OrderOptionsSheet
         order={optionsFor}
         paused={paused}
@@ -419,7 +503,7 @@ export default function KitchenBoard({ isAdmin = false }: { isAdmin?: boolean })
         loudMode={loudMode}
         onToggleLoud={toggleLoud}
       />
-    </StaffShell>
+    </div>
   );
 }
 
@@ -435,152 +519,153 @@ function useWallClock() {
   return s;
 }
 
-function Column({
-  title,
+function TabButton({
+  id,
+  label,
   count,
-  tone,
-  empty,
-  note,
-  children,
+  hot,
+  current,
+  onPick,
 }: {
-  title: string;
+  id: Tab;
+  label: string;
   count: number;
-  tone: "new" | "cooking";
-  empty: string;
-  note?: string;
-  children: React.ReactNode;
+  hot?: boolean;
+  current: Tab;
+  onPick: (t: Tab) => void;
 }) {
+  const on = current === id;
   return (
-    <section>
-      <h2 className="flex flex-wrap items-center gap-3 font-serif text-3xl">
-        {title}
-        <span
-          key={count}
-          className={`kb-count-pulse grid h-8 min-w-8 place-items-center rounded-full px-2 font-sans text-sm font-extrabold ${
-            tone === "new" && count ? "bg-ember text-white shadow-[0_0_18px_rgba(255,90,30,.7)]" : "bg-white/10 text-white/70"
-          }`}
-        >
-          {count}
-        </span>
-        {note && <span className="text-xs font-bold uppercase tracking-[0.14em] text-white/40">{note}</span>}
-      </h2>
-      <div className="mt-4 grid gap-4">
-        {count === 0 ? <p className="rounded-2xl border border-dashed border-white/15 p-8 text-center text-sm text-white/45">{empty}</p> : children}
-      </div>
-    </section>
+    <button type="button" role="tab" aria-selected={on} className={`ue-tab ${on ? "is-on" : ""}`} onClick={() => onPick(id)}>
+      {label}
+      <span className={hot ? "is-hot" : ""}>{count}</span>
+    </button>
   );
 }
 
-function OrderCard({
+function Ticket({
   order,
   clock,
   busy,
-  hot,
+  wait,
+  onWait,
   onAccept,
-  onOptions,
-  onPatch,
+  onCollect,
+  onBack,
+  onMore,
+  onUndoCollect,
 }: {
   order: Order;
   clock: number;
   busy: number;
-  hot: boolean;
+  wait: number;
+  onWait: (m: number) => void;
   onAccept: () => void;
-  onOptions: () => void;
-  onPatch: Patch;
+  onCollect: () => void;
+  onBack: () => void;
+  onMore: () => void;
+  onUndoCollect: () => void;
 }) {
   const isNew = order.status === "new";
-  const placed = new Date(order.created_at).toLocaleTimeString("en-AU", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "Australia/Adelaide",
-  });
-  const waitedMin = Math.max(0, Math.floor((clock - new Date(order.created_at).getTime()) / 60000));
+  const preparing = order.status === "accepted";
+  const n = itemCount(order);
   const told = (order.wait_minutes ?? 0) + busy;
-  const etaClass = !isNew && order.wait_minutes != null ? (waitedMin > told + 3 ? "kb-eta is-late" : waitedMin >= told ? "kb-eta is-warm" : "kb-eta") : "kb-eta";
+  const waited = Math.max(0, Math.floor((clock - new Date(order.created_at).getTime()) / 60000));
 
   return (
-    <article
-      className={`kb-card${hot ? " kb-card--new" : ""} rounded-[22px] border p-5 ${
-        isNew
-          ? "border-ember/60 bg-[linear-gradient(180deg,rgba(255,91,31,.14),rgba(255,91,31,.04))] shadow-[0_0_0_1px_rgba(255,91,31,.3),0_20px_50px_-20px_rgba(255,90,20,.5)]"
-          : "border-blue-bright/40 bg-white/[0.04]"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="break-words font-serif text-[1.9rem] leading-none">{order.customer_name}</p>
-          <a href={`tel:${order.phone}`} className="mt-1 inline-block text-sm font-bold text-blue-sky">
-            {order.phone}
-          </a>
+    <article className="ue-ticket">
+      <button type="button" className="ue-back" onClick={onBack}>
+        Orders
+      </button>
+      <header className="ue-ticket-head">
+        <div>
+          <p className="ue-kicker">{isNew ? "New order" : preparing ? "Preparing" : order.status === "rejected" ? "Cancelled" : "Collected"}</p>
+          <h2>{order.customer_name}</h2>
+          <p className="ue-meta">
+            {n} {n === 1 ? "item" : "items"} · {ago(order.created_at, clock)}
+          </p>
         </div>
-        <div className="shrink-0 text-right">
-          <span className={`rounded-full px-2.5 py-1 text-[0.7rem] font-extrabold uppercase tracking-wide ${isNew ? "bg-ember text-white" : "bg-blue text-white"}`}>
-            {isNew ? "Incoming" : "In progress"}
-          </span>
-          <p className="mt-1.5 text-xs text-white/45">placed {placed}</p>
-        </div>
-      </div>
+        <a className="ue-phone" href={`tel:${order.phone}`}>
+          {order.phone}
+        </a>
+      </header>
 
-      <p className="mt-3 text-base">
-        <span className="text-white/50">Pickup</span> <b>{order.pickup_time}</b>
-        {!isNew && order.wait_minutes != null && (
-          <span className={`ml-2 rounded-full px-2 py-0.5 text-xs font-bold ${etaClass}`}>
-            {waitedMin}m waited · told {order.wait_minutes}m{busy > 0 ? ` +${busy}` : ""}
+      <p className="ue-pickup">
+        Pickup <strong>{order.pickup_time}</strong>
+        {preparing && order.wait_minutes != null && (
+          <span className={waited > told + 3 ? "is-late" : ""}>
+            {waited} min in · told {order.wait_minutes} min{busy > 0 ? ` + ${busy}` : ""}
           </span>
         )}
       </p>
 
-      <ul className="mt-4 space-y-2.5 border-t border-white/10 pt-4">
+      <ul className="ue-items">
         {order.items.map((item, i) => (
-          <li key={i} className="text-[1.02rem] leading-snug">
-            <b className="text-amber">{item.quantity}×</b> <b>{item.name}</b>
-            {(item.detail || item.notes) && (
-              <span className={`block text-sm ${/no\s|NO\s/.test(item.detail ?? "") ? "font-bold text-amber" : "text-white/60"}`}>
-                {item.detail ?? item.notes}
-              </span>
-            )}
+          <li key={i}>
+            <span className="ue-qty">{item.quantity}</span>
+            <span>
+              <strong>{item.name}</strong>
+              {(item.detail || item.notes) && (
+                <em>
+                  {(item.detail ?? item.notes ?? "").split(" · ").map((part, j) => (
+                    <span key={j}>
+                      {j > 0 ? " · " : ""}
+                      <span className={/^no\s/i.test(part) ? "is-off" : ""}>{part}</span>
+                    </span>
+                  ))}
+                </em>
+              )}
+            </span>
           </li>
         ))}
       </ul>
 
       {order.order_notes && (
-        <p className="mt-3 rounded-xl bg-amber/15 px-3 py-2 text-sm text-amber">
-          <b>Note:</b> {order.order_notes}
-        </p>
-      )}
-      {order.total != null && (
-        <p className="mt-3 flex justify-between border-t border-white/10 pt-3 text-sm text-white/60">
-          <span>Pay at counter</span>
-          <b className="font-serif text-xl font-normal tabular-nums text-gold">{formatMoney(Number(order.total))}</b>
+        <p className="ue-note">
+          <strong>Note. </strong>
+          {order.order_notes}
         </p>
       )}
 
-      <div className="mt-4 flex gap-2.5">
-        {isNew ? (
-          <button type="button" onClick={onAccept} className="press-btn press-btn--accept min-h-[60px] flex-1 text-xl">
-            Accept
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={(e) => {
-              igniteAt(e.currentTarget, 26, 1);
-              bump();
-              onPatch(order.id, { status: "collected" });
-            }}
-            className="press-btn press-btn--accept min-h-[60px] flex-1 text-xl"
-          >
-            Collected
+      {order.total != null && (
+        <p className="ue-total">
+          <span>Pay at the counter</span>
+          <strong>{formatMoney(Number(order.total))}</strong>
+        </p>
+      )}
+
+      {isNew && (
+        <div className="ue-times" role="group" aria-label="How many minutes">
+          {WAIT_OPTIONS.map((m) => (
+            <button key={m} type="button" className={wait === m ? "is-on" : ""} onClick={() => onWait(m)}>
+              {m} min
+            </button>
+          ))}
+        </div>
+      )}
+      {isNew && busy > 0 && <p className="ue-hint">Customer is told {wait + busy} min, because the shop is running {busy} min behind.</p>}
+
+      <div className="ue-actions">
+        {isNew && (
+          <button type="button" className="ue-btn" onClick={onAccept}>
+            Accept · {wait} min
           </button>
         )}
-        <button
-          type="button"
-          onClick={onOptions}
-          aria-label={`More options for ${order.customer_name}'s order`}
-          className="press-btn grid min-h-[60px] w-[60px] place-items-center rounded-2xl border border-white/20 text-2xl font-black text-white/80 hover:border-white/45"
-        >
-          ⋯
-        </button>
+        {preparing && (
+          <button type="button" className="ue-btn" onClick={onCollect}>
+            Mark collected
+          </button>
+        )}
+        {order.status === "collected" && (
+          <button type="button" className="ue-btn ue-btn--ghost" onClick={onUndoCollect}>
+            Put back on the spit
+          </button>
+        )}
+        {order.status !== "rejected" && order.status !== "collected" && (
+          <button type="button" className="ue-btn ue-btn--ghost" onClick={onMore}>
+            More
+          </button>
+        )}
       </div>
     </article>
   );

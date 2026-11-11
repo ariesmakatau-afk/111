@@ -29,15 +29,15 @@ Deploys to Vercel as a standard Next.js project.
 | Staff (password, not indexed) | |
 |---|---|
 | `/staff` | Sign in — 5 tries per device, then a 15-minute lock; at most 3 devices signed in at once |
-| `/kitchen` | **Kitchen tab** — one big button per ticket: **Accept** opens a time picker and only accepts when you confirm, then **Collected**. A **⋯** menu per order holds more time, change amounts, sold out, pause online orders and reject. **⚙ Settings** holds pacing (+0–20 min), the sold-out line, pause, the alarm (nine recordings in `public/sounds`, "Absolute disturbance" by default, loops until silenced, red screen flash) and phone alerts. No Admin tab — staff can't reach admin. |
-| `/admin` | **Admin tab** — today's numbers, online-ordering switch, staff photos, customer wall, catering enquiries, signed-in devices (sign any device out), setup checklist |
+| `/kitchen` | **Kitchen screen** — white, full-screen, laid out like the Uber Eats restaurant orders app. Tabs for New, Preparing and Done. Tap a ticket, pick 10/15/20/30/45 min, then **Accept**. **Mark collected** when it's handed over. **More** holds extra time, amounts, sold out, pause and reject. **Settings** holds pacing, the sold-out line, pause, and the alarm (the nine recordings in `public/sounds` are unchanged; a pager sting plays first, then the chosen tune loops until the order is accepted or silenced). The first tap of the day unlocks sound, because a browser will not play an alarm on its own. Admins see **Edit site**. |
+| `/admin` | **Edit the site** — photos, the deal, pause online ordering, today's numbers, catering enquiries, signed-in devices, and what's connected. Orders do not land here. |
 
 There's a small "Staff" link in the footer.
 
 **Staff sign-in rules** (`lib/session.ts`):
 - **Two passwords.** `STAFF_PASSWORD` for the crew, `ADMIN_PASSWORD` for the owner/manager.
 - **5 password attempts per device** (by IP address — devices on the shop Wi-Fi share one), then that device is locked out for 15 minutes.
-- **At most 3 staff devices signed in at once.** A 4th is turned away until a staff tab closes, or the admin signs one out from **Admin → Signed-in devices**.
+- **At most 3 staff devices signed in at once.** A 4th is turned away until a staff tab closes, or the admin signs one out from **Edit the site → Devices**.
 - **The admin password is never locked out**: it skips the attempt limit, never uses one of the 3 slots, and staff can't sign an admin out. Because it can't be locked, make it long (12+ characters) — the Setup checklist warns if it isn't.
 - **Signed in for as long as the staff tab is open** — reloads and a sleeping screen included, so the kitchen tablet stays signed in all night. **Closing the tab signs out**: any new or reopened tab asks for the password, and the closed tab's slot frees up within a minute.
 - Staff sign-in needs the database (it's where sign-ins are tracked).
@@ -47,7 +47,7 @@ There's a small "Staff" link in the footer.
 1. Customer adds items on `/menu` and checks out (name, mobile, pickup time). **No online payment** — they pay at the counter.
 2. The server **re-prices every line from the menu** (the browser's prices are never trusted) and rejects anything the menu doesn't allow.
 3. The order is saved, and a message goes to the shop phone (Telegram).
-4. The kitchen alarm goes off. Staff tap **Accept**, pick a wait (10/15/20/30/45 min, ±5), and confirm.
+4. The order appears on `/kitchen` and the alarm plays. Staff pick a wait (10/15/20/30/45 min) and tap **Accept**. If the order could not be saved for the kitchen, the customer is told to call — they are not shown "order sent".
 5. The customer's tracking page updates to "About 15 minutes". Staff mark it collected.
 6. Every Sunday night, an email summarises the week's orders (orders are kept, never deleted).
 

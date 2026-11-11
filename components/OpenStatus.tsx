@@ -19,7 +19,7 @@ export default function OpenStatus({ className = "", compact = false }: { classN
     return () => window.clearInterval(id);
   }, []);
 
-  const label = state ? state.label : "Checking the coals…";
+  const label = state ? state.label : "Checking if we're open…";
   return (
     <span className={`status ${state?.open ? "is-open" : ""} ${className}`} role="status" aria-live="polite">
       <span className="status__dot" aria-hidden="true" />

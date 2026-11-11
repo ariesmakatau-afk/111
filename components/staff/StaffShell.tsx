@@ -42,7 +42,7 @@ export default function StaffShell({
               <Image src="/images/medallion-192.png" alt="" fill sizes="36px" />
             </span>
             <span className={`hidden font-serif text-xl sm:block ${dark ? "text-white" : "text-blue-navy"}`}>
-              {showAdmin ? "Yianni’s staff" : "Kitchen"}
+              {pathname === "/admin" ? "Edit the site" : showAdmin ? "Yianni’s" : "Kitchen"}
             </span>
           </Link>
           {tabs.length > 1 && (

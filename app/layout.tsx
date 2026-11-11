@@ -35,7 +35,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-AU">
+    <html lang="en-AU" suppressHydrationWarning>
       <head>
         {/* Mark JS as available before first paint, so reveal-on-scroll never hides content without it. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />

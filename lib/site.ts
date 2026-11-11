@@ -125,9 +125,9 @@ export const reviews = [
  * own (conservative) estimate; the rest are true by definition.
  */
 export const houseNumbers = [
-  { value: 3, suffix: "", label: "Meats, total", aside: "Lamb, chicken, pork. Ask for a fourth and yia-yia gets involved." },
-  { value: 0, suffix: "", label: "Recipe changes", aside: "Right the first time. Don't tell the cousins." },
-  { value: 0, suffix: "%", label: "Garlic restraint", aside: "Your colleagues will know. Tomorrow." },
+  { value: 3, suffix: "", label: "Meats on the spit", aside: "Lamb, chicken and pork. Carved to order, nothing else on the fire." },
+  { value: 0, suffix: "", label: "Recipe changes", aside: "Same charcoal, same garlic sauce, since the shop opened." },
+  { value: 0, suffix: "%", label: "Holding back the garlic", aside: "Say if you want less. Otherwise it goes on properly." },
 ];
 
 export const faqs = [

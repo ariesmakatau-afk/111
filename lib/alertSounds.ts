@@ -89,21 +89,58 @@ export function preloadAlert(id: AlertSoundId = DEFAULT_SOUND): void {
   void load(id);
 }
 
+/** Peak level of a decoded file, sampled so a long clip stays cheap to measure. */
+function peakOf(buf: AudioBuffer): number {
+  let peak = 0;
+  const step = 48;
+  for (let c = 0; c < buf.numberOfChannels; c++) {
+    const data = buf.getChannelData(c);
+    for (let i = 0; i < data.length; i += step) {
+      const a = Math.abs(data[i]);
+      if (a > peak) peak = a;
+    }
+  }
+  return peak || 1;
+}
+
+/**
+ * The saved recordings stay as they are. Playback is what changes: quiet
+ * files are lifted to the same peak, a compressor keeps them from clipping,
+ * and a little top end helps them cut through a busy shop.
+ */
+function chain(ac: AudioContext, src: AudioBufferSourceNode, buf: AudioBuffer): void {
+  const peak = peakOf(buf);
+  const makeup = Math.min(3.4, 0.92 / peak);
+  const shelf = ac.createBiquadFilter();
+  shelf.type = "highshelf";
+  shelf.frequency.value = 2200;
+  shelf.gain.value = 4.5;
+  const comp = ac.createDynamicsCompressor();
+  comp.threshold.value = -18;
+  comp.knee.value = 6;
+  comp.ratio.value = 8;
+  comp.attack.value = 0.002;
+  comp.release.value = 0.16;
+  const gain = ac.createGain();
+  gain.gain.value = getAlertVolume() * makeup;
+  src.connect(shelf);
+  shelf.connect(comp);
+  comp.connect(gain);
+  gain.connect(ac.destination);
+}
+
 /** Start a sound; returns a stop function. `loop` repeats it seamlessly until stopped. */
-function start(id: AlertSoundId, loop: boolean): () => void {
+function start(id: AlertSoundId, loop: boolean, delay = 0): () => void {
   let stopped = false;
   let src: AudioBufferSourceNode | null = null;
   void load(id).then((buf) => {
     const ac = ctx();
     if (stopped || !buf || !ac) return;
-    const gain = ac.createGain();
-    gain.gain.value = getAlertVolume();
     src = ac.createBufferSource();
     src.buffer = buf;
     src.loop = loop;
-    src.connect(gain);
-    gain.connect(ac.destination);
-    src.start();
+    chain(ac, src, buf);
+    src.start(ac.currentTime + delay);
   });
   return () => {
     stopped = true;
@@ -127,11 +164,31 @@ export function stopAlert(): void {
   stopPreview = null;
 }
 
+/**
+ * A short pager-style sting, the same every time, so the kitchen hears
+ * "new order" before whichever saved tune they picked starts looping.
+ */
+function playNotifySting(): void {
+  try {
+    const ac = ctx();
+    if (!ac) return;
+    const dest = ac.createGain();
+    dest.gain.value = Math.min(1, getAlertVolume());
+    dest.connect(ac.destination);
+    const t = ac.currentTime + 0.01;
+    tone(ac, dest, t, 784, 0.11, "square", 0.45);
+    tone(ac, dest, t + 0.13, 988, 0.11, "square", 0.5);
+    tone(ac, dest, t + 0.26, 1318, 0.22, "square", 0.55);
+    tone(ac, dest, t + 0.42, 1568, 0.18, "triangle", 0.4);
+  } catch {}
+}
+
 /** Loop an alarm until the board silences it. Returns the stop function. */
 export function startUrgentLoop(id: AlertSoundId = DEFAULT_SOUND): () => void {
   stopPreview?.();
   stopPreview = null;
-  return start(id, true);
+  playNotifySting();
+  return start(id, true, 0.7);
 }
 
 function tone(ac: AudioContext, dest: AudioNode, at: number, freq: number, duration: number, type: OscillatorType, peak: number) {

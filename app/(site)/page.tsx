@@ -121,12 +121,20 @@ const usuals: Usual[] = [
   },
 ];
 
-function Stars({ className = "h-3.5 w-3.5" }: { className?: string }) {
+function Stars({ value = rating.value, className = "h-3.5 w-3.5" }: { value?: number; className?: string }) {
   return (
-    <span className="flex gap-0.5 text-amber" aria-hidden="true">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <IconStar key={i} className={className} />
-      ))}
+    <span className="flex gap-0.5" aria-hidden="true">
+      {Array.from({ length: 5 }).map((_, i) => {
+        const fill = Math.max(0, Math.min(1, value - i));
+        return (
+          <span key={i} className="relative inline-flex text-amber">
+            <IconStar className={`${className} opacity-40`} />
+            <span className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${fill * 100}%` }}>
+              <IconStar className={className} />
+            </span>
+          </span>
+        );
+      })}
     </span>
   );
 }
@@ -205,7 +213,7 @@ export default async function HomePage() {
               <div>
                 <dt className="sr-only">Yiros served</dt>
                 <dd className="font-serif text-3xl leading-none text-white">1M+</dd>
-                <dd className="mt-1 text-xs font-semibold text-white/55">yiros served (roughly)</dd>
+                <dd className="mt-1 text-xs font-semibold text-white/55">yiros carved here</dd>
               </div>
               <div>
                 <dt className="sr-only">Established</dt>

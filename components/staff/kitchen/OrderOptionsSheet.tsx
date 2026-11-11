@@ -66,14 +66,14 @@ export default function OrderOptionsSheet({
   ];
 
   return (
-    <Sheet open onClose={onClose} label={`Options for ${order.customer_name}'s order`} tone="dark">
+    <Sheet open onClose={onClose} label={`Options for ${order.customer_name}'s order`} tone="light">
       <div className="overflow-y-auto p-6 pt-7 sm:p-8">
         {view !== "menu" && (
-          <button type="button" onClick={() => setView("menu")} className="mb-3 text-sm font-bold text-white/55 hover:text-white">
+          <button type="button" onClick={() => setView("menu")} className="mb-3 text-sm font-bold text-[#3a3a3a]">
             ← Back
           </button>
         )}
-        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-white/50">Order options</p>
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#3a3a3a]">Order options</p>
         <h2 className="mt-2 pr-12 font-serif text-4xl leading-none">{order.customer_name}</h2>
 
         {view === "menu" && (
@@ -86,14 +86,14 @@ export default function OrderOptionsSheet({
                     type="button"
                     onClick={() => (r.action ? r.action() : r.view && setView(r.view))}
                     className={`press-btn flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left ${
-                      r.danger ? "border-ember/50 bg-ember/10" : "border-white/15 bg-white/[0.04] hover:border-white/35"
+                      r.danger ? "border-[#e7b2ab] bg-[#fde8e6]" : "border-[#e4e4e4] bg-[#fafafa]"
                     }`}
                   >
                     <span>
-                      <span className={`block text-lg font-extrabold ${r.danger ? "text-[#ffb59c]" : ""}`}>{r.label}</span>
-                      <span className="block text-sm text-white/55">{r.sub}</span>
+                      <span className={`block text-lg font-extrabold ${r.danger ? "text-[#8a1c13]" : "text-[#111]"}`}>{r.label}</span>
+                      <span className="block text-sm text-[#3a3a3a]">{r.sub}</span>
                     </span>
-                    <span aria-hidden="true" className="text-xl text-white/40">
+                    <span aria-hidden="true" className="text-xl text-[#3a3a3a]">
                       →
                     </span>
                   </button>
@@ -104,8 +104,8 @@ export default function OrderOptionsSheet({
 
         {view === "time" && (
           <div className="mt-6">
-            <p className="text-sm text-white/65">
-              Currently told <b className="text-white">{order.wait_minutes ?? 0} min</b>. Add:
+            <p className="text-sm text-[#3a3a3a]">
+              Currently told <b className="text-[#111]">{order.wait_minutes ?? 0} min</b>. Add:
             </p>
             <div className="mt-4 grid grid-cols-3 gap-2.5">
               {[5, 10, 15].map((m) => (
@@ -119,7 +119,7 @@ export default function OrderOptionsSheet({
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-xs text-white/45">The customer&rsquo;s tracker updates straight away.</p>
+            <p className="mt-3 text-xs font-semibold text-[#3a3a3a]">The customer&rsquo;s tracker updates straight away.</p>
           </div>
         )}
 
@@ -130,14 +130,14 @@ export default function OrderOptionsSheet({
                 <li key={i} className="flex items-center gap-3">
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-bold">{item.name}</span>
-                    {item.detail && <span className="block truncate text-xs text-white/50">{item.detail}</span>}
+                    {item.detail && <span className="block truncate text-xs font-semibold text-[#3a3a3a]">{item.detail}</span>}
                   </span>
                   <button
                     type="button"
                     aria-label={`One less ${item.name}`}
                     disabled={item.quantity <= 1}
                     onClick={() => setLines((ls) => ls.map((l, j) => (j === i ? { ...l, quantity: l.quantity - 1 } : l)))}
-                    className="press-btn grid h-12 w-12 place-items-center rounded-full border border-white/25 text-xl"
+                    className="press-btn grid h-12 w-12 place-items-center rounded-full border border-[#d0d0d0] text-xl"
                   >
                     −
                   </button>
@@ -146,16 +146,16 @@ export default function OrderOptionsSheet({
                     type="button"
                     aria-label={`One more ${item.name}`}
                     onClick={() => setLines((ls) => ls.map((l, j) => (j === i ? { ...l, quantity: Math.min(99, l.quantity + 1) } : l)))}
-                    className="press-btn grid h-12 w-12 place-items-center rounded-full border border-white/25 text-xl"
+                    className="press-btn grid h-12 w-12 place-items-center rounded-full border border-[#d0d0d0] text-xl"
                   >
                     +
                   </button>
                 </li>
               ))}
             </ul>
-            <p className="mt-4 flex justify-between border-t border-white/10 pt-3 text-sm text-white/60">
+            <p className="mt-4 flex justify-between border-t border-[#ececec] pt-3 text-sm font-semibold text-[#3a3a3a]">
               <span>New total</span>
-              <b className="font-serif text-xl font-normal text-gold tabular-nums">{formatMoney(total)}</b>
+              <b className="font-serif text-xl font-normal text-[#111] tabular-nums">{formatMoney(total)}</b>
             </p>
             <button type="button" onClick={() => done(() => onPatch(order.id, { items: lines }))} className="press-btn press-btn--accept mt-5 w-full min-h-[60px] text-lg">
               Save amounts
@@ -165,7 +165,7 @@ export default function OrderOptionsSheet({
 
         {view === "soldout" && (
           <div className="mt-6">
-            <p className="text-sm text-white/65">What&rsquo;s run out? It shows on the menu and at checkout until you clear it in Settings.</p>
+            <p className="text-sm font-semibold text-[#3a3a3a]">What&rsquo;s run out? It shows on the menu and at checkout until you clear it in Settings.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {SOLDOUT_QUICK.map((x) => (
                 <button
@@ -173,7 +173,7 @@ export default function OrderOptionsSheet({
                   type="button"
                   onClick={() => setSoldOut(`${x} is sold out tonight.`)}
                   className={`press-btn rounded-full border px-4 py-2.5 text-sm font-extrabold ${
-                    soldOut.startsWith(x) ? "border-amber bg-amber/20 text-amber" : "border-white/20 text-white/85"
+                    soldOut.startsWith(x) ? "border-black bg-black text-white" : "border-[#d0d0d0] text-[#111]"
                   }`}
                 >
                   {x}
@@ -184,7 +184,7 @@ export default function OrderOptionsSheet({
               value={soldOut}
               onChange={(e) => setSoldOut(e.target.value.slice(0, 140))}
               placeholder="Or type it, e.g. Out of pita for 10 minutes."
-              className="mt-3 w-full rounded-xl border border-white/15 bg-char-900 px-4 py-3 text-white placeholder:text-white/30 focus:border-amber focus:outline-none"
+              className="mt-3 w-full rounded-xl border border-[#d0d0d0] bg-white px-4 py-3 text-[#111] placeholder:text-[#5c5c5c] focus:border-black focus:outline-none"
             />
             <button
               type="button"
@@ -194,9 +194,9 @@ export default function OrderOptionsSheet({
             >
               Post it
             </button>
-            <p className="mt-3 text-xs text-white/45">
+            <p className="mt-3 text-xs font-semibold text-[#3a3a3a]">
               If this order has it, call {order.customer_name} on{" "}
-              <a href={`tel:${order.phone}`} className="font-bold text-blue-sky">
+              <a href={`tel:${order.phone}`} className="font-bold text-[#0b3278]">
                 {order.phone}
               </a>
               .
@@ -206,7 +206,7 @@ export default function OrderOptionsSheet({
 
         {view === "reject" && (
           <div className="mt-6">
-            <p className="text-base text-white/75">Call {order.customer_name} before you {isNew ? "reject" : "cancel"} it, so nobody turns up to nothing.</p>
+            <p className="text-base font-semibold text-[#222]">Call {order.customer_name} before you {isNew ? "reject" : "cancel"} it, so nobody turns up to nothing.</p>
             <a href={`tel:${order.phone}`} className="press-btn press-btn--light mt-4 flex w-full min-h-[60px] text-lg">
               Call {order.phone}
             </a>

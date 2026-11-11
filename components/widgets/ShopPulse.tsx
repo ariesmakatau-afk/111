@@ -27,7 +27,7 @@ export default function ShopPulse({ className = "" }: { className?: string }) {
         {now === null ? (
           <>
             <span className="pulse-card__dot" aria-hidden="true" />
-            Checking the coals…
+            Checking if we're open…
           </>
         ) : now.open ? (
           <>

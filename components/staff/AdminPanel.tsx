@@ -37,13 +37,13 @@ type Setup = { database: boolean; staffLogin: boolean; adminLogin: boolean; phon
 
 const SECTIONS = [
   { id: "today", label: "Today" },
-  { id: "ordering", label: "Online ordering" },
-  { id: "deal", label: "Deal" },
-  { id: "staff", label: "Staff photos" },
-  { id: "customers", label: "Customer wall" },
+  { id: "ordering", label: "Pause ordering" },
+  { id: "deal", label: "The deal" },
+  { id: "staff", label: "Team photos" },
+  { id: "customers", label: "Customer photos" },
   { id: "catering", label: "Catering" },
-  { id: "devices", label: "Signed-in devices" },
-  { id: "setup", label: "Setup" },
+  { id: "devices", label: "Devices" },
+  { id: "setup", label: "What's connected" },
 ];
 
 export default function AdminPanel({
@@ -124,7 +124,11 @@ export default function AdminPanel({
         <div className="grid gap-8">
           {/* Today */}
           <section id="today" className="scroll-mt-24">
-            <h1 className="h-md text-blue-navy">Today at Yianni&rsquo;s</h1>
+            <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-blue">Website edits</p>
+            <h1 className="h-md mt-2 text-blue-navy">Change what customers see</h1>
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink">
+              Photos, the deal, and whether the shop is taking online orders are changed here. New orders do not land on this page — they go to the kitchen screen.
+            </p>
             {stats ? (
               <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 {[
@@ -144,15 +148,17 @@ export default function AdminPanel({
             ) : (
               <p className="mt-3 text-sm text-muted">Connect the database (see Setup) to see today&rsquo;s numbers.</p>
             )}
-            <Link href="/kitchen" className="btn btn-blue btn-sm mt-5">
-              Open the kitchen board →
+            <Link href="/kitchen" className="btn btn-blue mt-5">
+              Open the kitchen
             </Link>
           </section>
 
           {/* Ordering switch */}
           <section id="ordering" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
-            <h2 className="font-serif text-3xl text-blue-navy">Online ordering</h2>
-            <p className="mt-1 text-sm text-muted">Slammed on a Friday? Pause it. Customers see your message and the phone number instead.</p>
+            <h2 className="font-serif text-3xl text-blue-navy">Pause online ordering</h2>
+            <p className="mt-1 text-base text-ink">
+              Turn this off when the shop is too busy. Customers see your message and the phone number, and no new order is sent to the kitchen.
+            </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
               <button
                 type="button"
@@ -179,27 +185,27 @@ export default function AdminPanel({
 
           {/* Deal */}
           <section id="deal" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
-            <h2 className="font-serif text-3xl text-blue-navy">Deal</h2>
-            <p className="mt-1 text-sm text-muted">
-              The banner line shows at the top of the home page. Tapping it takes people to the full deal at the top of the Menu page.
+            <h2 className="font-serif text-3xl text-blue-navy">The deal</h2>
+            <p className="mt-1 text-base text-ink">
+              The short line sits at the top of the home page. Tapping it opens the full deal at the top of the menu.
             </p>
             <DealEditor initial={deal} disabled={!setup.database} />
           </section>
 
           {/* Staff */}
           <section id="staff" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
-            <h2 className="font-serif text-3xl text-blue-navy">Staff photos</h2>
-            <p className="mb-5 mt-1 text-sm text-muted">
-              Shown on the Parea page and the home page as &ldquo;The team&rdquo;. Ask before posting anyone — and take it down if they leave.
+            <h2 className="font-serif text-3xl text-blue-navy">Team photos</h2>
+            <p className="mb-5 mt-1 text-base text-ink">
+              These show on the home page and the Parea page as the team. Ask before you post anyone, and take the photo down if they leave.
             </p>
             <PhotoWall kind="team" initial={team} limit={4} />
           </section>
 
           {/* Customers */}
           <section id="customers" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
-            <h2 className="font-serif text-3xl text-blue-navy">Customer wall</h2>
-            <p className="mb-5 mt-1 text-sm text-muted">
-              Regulars, first-timers, big nights. Shown on the Parea page and the home page. Always get a spoken yes before posting a face.
+            <h2 className="font-serif text-3xl text-blue-navy">Customer photos</h2>
+            <p className="mb-5 mt-1 text-base text-ink">
+              Regulars and big nights, on the home page and the Parea page. Get a spoken yes before you post a face.
             </p>
             <PhotoWall kind="customers" initial={customers} limit={4} />
           </section>
@@ -207,7 +213,7 @@ export default function AdminPanel({
           {/* Catering */}
           <section id="catering" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
             <h2 className="font-serif text-3xl text-blue-navy">Catering enquiries</h2>
-            <p className="mt-1 text-sm text-muted">From the form on the Catering page. Each one also pings the shop phone.</p>
+            <p className="mt-1 text-base text-ink">From the form on the catering page. Each one also reaches the shop phone.</p>
             {enquiries.length === 0 ? (
               <p className="mt-5 rounded-2xl border border-dashed border-line p-6 text-center text-sm text-muted">No enquiries yet.</p>
             ) : (
@@ -249,16 +255,18 @@ export default function AdminPanel({
           {/* Signed-in devices */}
           <section id="devices" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
             <h2 className="font-serif text-3xl text-blue-navy">Signed-in devices</h2>
-            <p className="mt-1 text-sm text-muted">
-              Up to {maxSessions} staff devices can be signed in at once; the admin password never uses a slot and is never locked out. A device stays signed in while its staff tab is open — even with the screen asleep — and is signed out when the tab closes.
+            <p className="mt-1 text-base text-ink">
+              Up to {maxSessions} kitchen devices can be signed in at once. This admin login does not use one of those spots. A tablet stays signed in while the kitchen tab is open, including when the screen sleeps, and signs out when the tab is closed.
             </p>
             <SignedInDevices max={maxSessions} />
           </section>
 
           {/* Setup */}
           <section id="setup" className="tile scroll-mt-24 p-6 hover:!translate-y-0">
-            <h2 className="font-serif text-3xl text-blue-navy">Setup</h2>
-            <p className="mt-1 text-sm text-muted">What&rsquo;s connected. Anything missing is set in Vercel → Settings → Environment Variables (see README).</p>
+            <h2 className="font-serif text-3xl text-blue-navy">What&rsquo;s connected</h2>
+            <p className="mt-1 text-base text-ink">
+              If something here is missing, orders or photos will not save. Those connections are set in the hosting account, not on this page.
+            </p>
             <ul className="mt-4 grid gap-2 sm:grid-cols-2">
               {[
                 ["Database & photo storage", setup.database, "Orders, kitchen board, photos, catering"],

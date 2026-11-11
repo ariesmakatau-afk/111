@@ -4,7 +4,7 @@ const DEFAULT = [
   "Carved to order",
   "Real charcoal, never gas",
   "Garlic sauce made in the shop",
-  "Lamb · Chicken · PORK — three spits, no ranking",
+  "Lamb, chicken and pork — three spits",
   "Late on Fridays & Saturdays",
   "Hindley Street since 2002",
 ];
